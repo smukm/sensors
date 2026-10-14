@@ -2,4 +2,7 @@
     <qresource prefix="/resources">
         <file>imgs/bg.png</file>
     </qresource>
+    <qresource prefix="/translations">
+        <file>sensors_ru_RU.ts</file>
+    </qresource>
 </RCC>

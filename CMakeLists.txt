@@ -17,9 +17,14 @@ qt_add_executable(sensors
     ${RESOURCES}
 )
 
+set(TS_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/sensors_ru_RU.ts  # Русский перевод
+)
+
 qt_add_translations(
     TARGETS sensors
-    TS_FILES sensors_ru_RU.ts
+    TS_FILES ${TS_FILES}
+    RESOURCE_PREFIX "/translations"
 )
 
 target_link_libraries(sensors
