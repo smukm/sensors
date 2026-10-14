@@ -84,6 +84,46 @@ QPushButton:checked { background: #555; }
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnTab3">
+         <property name="text">
+          <string>Protocol</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnTab4">
+         <property name="text">
+          <string>Configuration</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnTab5">
+         <property name="text">
+          <string>Imitator</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnTab6">
+         <property name="text">
+          <string>Settings</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="tabBarSpacer">
          <property name="orientation">
           <enum>Qt::Orientation::Horizontal</enum>
@@ -101,15 +141,15 @@ QPushButton:checked { background: #555; }
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="page_1">
+      <widget class="QWidget" name="stand_1">
        <property name="styleSheet">
-        <string notr="true">QWidget#page_1 {
+        <string notr="true">QWidget#stand_1 {
     border-image: url(:/resources/imgs/bg.png) 0 0 0 0 stretch stretch;
 }
-QWidget#page_1 QLabel {
+QWidget#stand_1 QLabel {
     background-color: grey; color: white; border: 2px solid black;
 }
-QWidget#page_1 QLineEdit {
+QWidget#stand_1 QLineEdit {
     background-color: white; color: black;
 }</string>
        </property>
@@ -157,6 +197,12 @@ QWidget#page_1 QLineEdit {
           <height>41</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+          <bold>true</bold>
+         </font>
+        </property>
        </widget>
        <widget class="QLabel" name="c19lbl">
         <property name="geometry">
@@ -178,7 +224,81 @@ QWidget#page_1 QLineEdit {
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_2"/>
+      <widget class="QWidget" name="stand_2">
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>40</y>
+          <width>391</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Мнемосхем стенда 2</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="protocol">
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>30</y>
+          <width>181</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Protocol</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="configuration">
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>40</y>
+          <width>151</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>configuration</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="imitator">
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>40</y>
+          <width>58</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>imitator</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="settings">
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>30</y>
+          <width>101</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Settings</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>

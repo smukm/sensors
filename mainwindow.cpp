@@ -28,14 +28,66 @@ MainWindow::MainWindow(QWidget *parent)
         ui->stackedWidget->setCurrentIndex(0);
         ui->btnTab1->setChecked(true);
         ui->btnTab2->setChecked(false);
+        ui->btnTab3->setChecked(false);
+        ui->btnTab4->setChecked(false);
+        ui->btnTab5->setChecked(false);
+        ui->btnTab6->setChecked(false);
         onTabChanged(0);
     });
     connect(ui->btnTab2, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentIndex(1);
         ui->btnTab1->setChecked(false);
         ui->btnTab2->setChecked(true);
+        ui->btnTab3->setChecked(false);
+        ui->btnTab4->setChecked(false);
+        ui->btnTab5->setChecked(false);
+        ui->btnTab6->setChecked(false);
         onTabChanged(1);
     });
+    connect(ui->btnTab3, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(2);
+        ui->btnTab1->setChecked(false);
+        ui->btnTab2->setChecked(false);
+        ui->btnTab3->setChecked(true);
+        ui->btnTab4->setChecked(false);
+        ui->btnTab5->setChecked(false);
+        ui->btnTab6->setChecked(false);
+        onTabChanged(2);
+    });
+    connect(ui->btnTab4, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(3);
+        ui->btnTab1->setChecked(false);
+        ui->btnTab2->setChecked(false);
+        ui->btnTab3->setChecked(false);
+        ui->btnTab4->setChecked(true);
+        ui->btnTab5->setChecked(false);
+        ui->btnTab6->setChecked(false);
+        onTabChanged(3);
+    });
+    connect(ui->btnTab5, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(4);
+        ui->btnTab1->setChecked(false);
+        ui->btnTab2->setChecked(false);
+        ui->btnTab3->setChecked(false);
+        ui->btnTab4->setChecked(false);
+        ui->btnTab5->setChecked(true);
+        ui->btnTab6->setChecked(false);
+        onTabChanged(4);
+    });
+    connect(ui->btnTab6, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(5);
+        ui->btnTab1->setChecked(false);
+        ui->btnTab2->setChecked(false);
+        ui->btnTab3->setChecked(false);
+        ui->btnTab4->setChecked(false);
+        ui->btnTab5->setChecked(false);
+        ui->btnTab6->setChecked(true);
+        onTabChanged(4);
+    });
+
+
+    ui->c19le->setText("20.1 %");
+    ui->c27le->setText("12.3 %");
 
     onTabChanged(0);
 }
@@ -71,8 +123,8 @@ void MainWindow::repositionElements()
     if (ui->stackedWidget->currentIndex() != 0)
         return;
 
-    const int pw = ui->page_1->width();
-    const int ph = ui->page_1->height();
+    const int pw = ui->stand_1->width();
+    const int ph = ui->stand_1->height();
 
     if (pw <= 0 || ph <= 0)
         return;
