@@ -140,6 +140,44 @@ QPushButton:checked { background: #555; }
      </widget>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QRadioButton" name="radioButton">
+        <property name="text">
+         <string>RadioButton</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioButton_2">
+        <property name="text">
+         <string>RadioButton</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <widget class="QWidget" name="stand_1">
        <property name="styleSheet">
@@ -312,6 +350,30 @@ QWidget#stand_1 QLineEdit {
      <height>24</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSaveToFile">
+    <property name="title">
+     <string>Запись в файл</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuOperations">
+    <property name="title">
+     <string>Операции</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuProtocol">
+    <property name="title">
+     <string>Протокол</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuExit">
+    <property name="title">
+     <string>Выход</string>
+    </property>
+   </widget>
+   <addaction name="menuSaveToFile"/>
+   <addaction name="menuOperations"/>
+   <addaction name="menuProtocol"/>
+   <addaction name="menuExit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
