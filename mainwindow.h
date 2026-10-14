@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -33,6 +34,7 @@ private:
 
     QList<ElementInfo> m_elements;
     bool m_positionsSaved = false;
+    QTimer* m_timer;
 
 private slots:
     void onTabChanged(int index);

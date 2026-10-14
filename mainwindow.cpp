@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QScreen>
+#include <QDateTime>
+
 
 // Структура для хранения относительных координат элемента
 struct ElementPos {
@@ -22,6 +24,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Сохраняем базовые координаты ИЗ UI файла ДО первого масштабирования
     saveBasePositions();
+
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, [=]() {
+        QString timeString = QDateTime::currentDateTime().toString("dd:MM:yyyy hh:mm:ss");
+        ui->dateTimeLbl->setText(timeString);
+    });
+    m_timer->start();
 
     // Подключаем кнопки табов
     connect(ui->btnTab1, &QPushButton::clicked, this, [this]() {
@@ -95,6 +104,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    if (m_timer) {
+        m_timer->stop();
+    }
 }
 
 void MainWindow::saveBasePositions()
