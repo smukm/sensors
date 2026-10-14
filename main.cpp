@@ -1,0 +1,29 @@
+#include "mainwindow.h"
+
+#include <QApplication>
+#include <QStyleFactory>
+#include <QLocale>
+#include <QTranslator>
+
+int main(int argc, char *argv[])
+{
+    // Включаем поддержку высокого DPI
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
+        Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+    QApplication a(argc, argv);
+
+    QTranslator translator;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &locale : uiLanguages) {
+        const QString baseName = "sensors_" + QLocale(locale).name();
+        if (translator.load(":/i18n/" + baseName)) {
+            a.installTranslator(&translator);
+            break;
+        }
+    }
+    MainWindow w;
+    w.show();
+    return QApplication::exec();
+}
