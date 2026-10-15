@@ -214,10 +214,14 @@ QPushButton:checked { background: #555; }
     border-image: url(:/resources/imgs/bg.png) 0 0 0 0 stretch stretch;
 }
 QWidget#stand_1 QLabel {
-    background-color: grey; color: white; border: 2px solid black;
+    background-color: grey; color: white; 
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+	font-size: 11pt; font-weight: bold;
 }
 QWidget#stand_1 QLineEdit {
     background-color: white; color: black;
+	font-size: 12pt; font-weight: bold;
 }</string>
        </property>
        <widget class="QLineEdit" name="c27le">
@@ -231,7 +235,7 @@ QWidget#stand_1 QLineEdit {
         </property>
         <property name="font">
          <font>
-          <pointsize>16</pointsize>
+          <pointsize>12</pointsize>
           <bold>true</bold>
          </font>
         </property>
@@ -247,7 +251,7 @@ QWidget#stand_1 QLineEdit {
         </property>
         <property name="font">
          <font>
-          <pointsize>14</pointsize>
+          <pointsize>11</pointsize>
           <bold>true</bold>
          </font>
         </property>
@@ -266,7 +270,7 @@ QWidget#stand_1 QLineEdit {
         </property>
         <property name="font">
          <font>
-          <pointsize>16</pointsize>
+          <pointsize>12</pointsize>
           <bold>true</bold>
          </font>
         </property>
@@ -282,7 +286,7 @@ QWidget#stand_1 QLineEdit {
         </property>
         <property name="font">
          <font>
-          <pointsize>14</pointsize>
+          <pointsize>11</pointsize>
           <bold>true</bold>
          </font>
         </property>

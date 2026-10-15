@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "uicontroller.h"
 #include <QMainWindow>
 #include <QTimer>
 
@@ -27,6 +28,7 @@ private:
     void repositionElements();
 
     Ui::MainWindow *ui;
+    UiController* m_uiController; // Вспомогательный контроллер для управления состоянием элементов UI.
     struct ElementInfo {
         QWidget *widget;
         QRect baseGeometry;  // координаты из UI файла (до первого масштабирования)

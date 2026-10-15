@@ -19,6 +19,7 @@ static const double BASE_H = 1080.0;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , m_uiController(new UiController(ui))
 {
     ui->setupUi(this);
 

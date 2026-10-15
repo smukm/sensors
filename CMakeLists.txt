@@ -15,6 +15,7 @@ qt_add_executable(sensors
     mainwindow.h
     mainwindow.ui
     ${RESOURCES}
+    uicontroller.h uicontroller.cpp
 )
 
 set(TS_FILES
