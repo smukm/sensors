@@ -8,6 +8,9 @@ class UiController
 public:
     explicit UiController(Ui::MainWindow *ui);
 
+    void setConnectedState();
+    void setDisconnectedState();
+
 private:
     Ui::MainWindow *m_ui;
 };

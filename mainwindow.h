@@ -3,6 +3,8 @@
 
 #include "uicontroller.h"
 #include "datamodel.h"
+#include "abstractmodbusmanager.h"
+#include "logmanager.h"
 #include <QMainWindow>
 #include <QTimer>
 
@@ -27,6 +29,10 @@ protected:
 private:
     void saveBasePositions();
     void repositionElements();
+    void connectToRMT();
+    void ensureCorrectManager();
+    void setupModbusConnections();
+    void sendReadData();
 
     Ui::MainWindow *ui;
     UiController* m_uiController; // Вспомогательный контроллер для управления состоянием элементов UI.
@@ -39,8 +45,12 @@ private:
     bool m_positionsSaved = false;
     QTimer* m_timer;
     DataModel* m_dataModel;
+    AbstractModbusManager* m_modbusManager;
+    QTimer *m_pollingTimer; // Таймер для автоматического периодического опроса устройств.
+    LogManager *m_logManager;
 
 private slots:
     void onTabChanged(int index);
+    void onPollingTimeout();
 };
 #endif // MAINWINDOW_H
