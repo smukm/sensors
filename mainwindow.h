@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "uicontroller.h"
+#include "datamodel.h"
 #include <QMainWindow>
 #include <QTimer>
 
@@ -37,6 +38,7 @@ private:
     QList<ElementInfo> m_elements;
     bool m_positionsSaved = false;
     QTimer* m_timer;
+    DataModel* m_dataModel;
 
 private slots:
     void onTabChanged(int index);

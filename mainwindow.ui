@@ -294,6 +294,16 @@ QWidget#stand_1 QLineEdit {
          <string>C19</string>
         </property>
        </widget>
+       <widget class="QTableView" name="tableView">
+        <property name="geometry">
+         <rect>
+          <x>1165</x>
+          <y>610</y>
+          <width>745</width>
+          <height>470</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="stand_2">
        <widget class="QLabel" name="label_2">

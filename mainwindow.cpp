@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_uiController(new UiController(ui))
+    , m_dataModel(new DataModel(this))
 {
     ui->setupUi(this);
 
@@ -32,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
         ui->dateTimeLbl->setText(timeString);
     });
     m_timer->start();
+
+    ui->tableView->setModel(m_dataModel);
 
     // Подключаем кнопки табов
     connect(ui->btnTab1, &QPushButton::clicked, this, [this]() {
@@ -122,6 +125,7 @@ void MainWindow::saveBasePositions()
         ui->c27le,
         ui->c19lbl,
         ui->c19le,
+        ui->tableView,
     };
 
     for (QWidget *w : widgets) {
