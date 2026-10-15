@@ -61,16 +61,16 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QRadioButton" name="radioButton">
+        <widget class="QRadioButton" name="connectToRmtRb">
          <property name="text">
-          <string>RadioButton</string>
+          <string>Connect to RMT 59</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_2">
+        <widget class="QRadioButton" name="recordingToFileRb">
          <property name="text">
-          <string>RadioButton</string>
+          <string>Recording to file</string>
          </property>
         </widget>
        </item>

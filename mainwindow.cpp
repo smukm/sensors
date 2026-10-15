@@ -72,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->c19le->setText("20.1 %");
     ui->c27le->setText("12.3 %");
+    ui->connectToRmtRb->setEnabled(true);
+    ui->recordingToFileRb->setEnabled(false);
 
     onTabChanged(0);
 }
@@ -84,6 +86,10 @@ MainWindow::~MainWindow()
     }
     if (m_pollingTimer) {
         m_pollingTimer->stop();
+    }
+    if (m_modbusManager) {
+        m_modbusManager->disconnectFromDevice();
+        m_modbusManager->deleteLater();
     }
 }
 
