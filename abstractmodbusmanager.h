@@ -39,6 +39,7 @@ struct ModbusRequest {
     quint16 count;
     QVector<quint16> values;
 };
+Q_DECLARE_METATYPE(ModbusRequest)
 
 struct Preferences;
 
@@ -72,7 +73,7 @@ signals:
     void disconnected();
     void errorOccurred(const QString &errorString);
     void errorCriticalOccurred(const QString &errorString);
-    void dataReceived(quint8 serverAddress, const QModbusDataUnit &data);
+    void dataReceived(const ModbusRequest &currentRequest, const QModbusDataUnit &data);
     void writeCompleted();
 
 protected slots:
@@ -88,7 +89,7 @@ protected:
     void resetInternalState();
 
     void processNextRequest();
-    void recordTimeout(quint8 serverAddress);
+    //void recordTimeout(quint8 serverAddress);
 
     QModbusClient *m_modbusDevice; // Указатель на базовый класс клиента
     QModbusReply *m_currentReply;
@@ -97,9 +98,8 @@ protected:
     ModbusRequest m_currentRequest;
     bool m_isProcessing;
 
-    QHash<quint8, QQueue<QDateTime>> m_timeoutHistory;
+    //QHash<quint8, QQueue<QDateTime>> m_timeoutHistory;
 
-    //static constexpr int MAX_TIMEOUTS = 3;
     static constexpr int TIMEOUT_WINDOW_MS = 30000;
 };
 

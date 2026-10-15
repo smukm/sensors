@@ -27,8 +27,6 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private:
-    void saveBasePositions();
-    void repositionElements();
     void connectToRMT();
     void ensureCorrectManager();
     void setupModbusConnections();
@@ -36,13 +34,7 @@ private:
 
     Ui::MainWindow *ui;
     UiController* m_uiController; // Вспомогательный контроллер для управления состоянием элементов UI.
-    struct ElementInfo {
-        QWidget *widget;
-        QRect baseGeometry;  // координаты из UI файла (до первого масштабирования)
-    };
 
-    QList<ElementInfo> m_elements;
-    bool m_positionsSaved = false;
     QTimer* m_timer;
     DataModel* m_dataModel;
     AbstractModbusManager* m_modbusManager;

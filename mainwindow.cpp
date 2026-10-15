@@ -7,36 +7,32 @@
 #include <QDateTime>
 #include <QButtonGroup>
 
-
-// Структура для хранения относительных координат элемента
-struct ElementPos {
-    QWidget *widget;
-    double x;      // доля от ширины (0.0 - 1.0)
-    double y;      // доля от высоты (0.0 - 1.0)
-    double w;      // доля от ширины
-    double h;      // доля от высоты
-};
-
-static const double BASE_W = 1920.0;
-static const double BASE_H = 1080.0;
-
+/**
+ * @brief Конструктор главного окна приложения.
+ * Инициализирует UI, создает вспомогательные контроллеры и таймеры,
+ * настраивает модель данных для таблицы и эмулирует поведение вкладок
+ * с помощью QButtonGroup. Также запускает первоначальное подключение к устройству.
+ */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_uiController(new UiController(ui))
     , m_dataModel(new DataModel(this))
     , m_modbusManager(nullptr)
-    , m_pollingTimer(new QTimer())
+    , m_pollingTimer(new QTimer(this))
     , m_logManager(new LogManager(this))
 {
     ui->setupUi(this);
 
-    // Сохраняем базовые координаты ИЗ UI файла ДО первого масштабирования
-    saveBasePositions();
+    // Сохраняем базовые координаты элементов мнемосхемы ИЗ UI файла
+    // ДО первого масштабирования, чтобы использовать их как эталон (100%).
+    m_uiController->saveBasePositions();
 
+    // Инициализация и проверка Modbus-менеджера
     ensureCorrectManager();
     connectToRMT();
 
+    // Таймер для обновления отображения текущих даты и времени на UI
     m_timer = new QTimer(this);
     m_timer->setInterval(1000);
     connect(m_timer, &QTimer::timeout, this, [=]() {
@@ -45,12 +41,16 @@ MainWindow::MainWindow(QWidget *parent)
     });
     m_timer->start();
 
+    // Таймер периодического опроса (polling) Modbus-устройств
     m_pollingTimer->setInterval(2000); // Интервал опроса в миллисекундах (2 секунды)
     connect(m_pollingTimer, &QTimer::timeout, this, &MainWindow::onPollingTimeout);
     m_pollingTimer->start();
 
+    // Привязка модели данных к таблице на UI
     ui->tableView->setModel(m_dataModel);
 
+    // Эмуляция вкладок (Tabs) с помощью группы кнопок.
+    // Это позволяет использовать стилизованные QPushButton вместо стандартного QTabBar.
     QButtonGroup *tabGroup = new QButtonGroup(this);
     tabGroup->addButton(ui->btnTab1, 0);
     tabGroup->addButton(ui->btnTab2, 1);
@@ -59,137 +59,71 @@ MainWindow::MainWindow(QWidget *parent)
     tabGroup->addButton(ui->btnTab5, 4);
     tabGroup->addButton(ui->btnTab6, 5);
     tabGroup->setExclusive(true); // Автоматически снимает выделение с других
+
     connect(tabGroup, &QButtonGroup::idClicked, this, [this](int id) {
         ui->stackedWidget->setCurrentIndex(id);
         onTabChanged(id);
     });
 
+    m_uiController->initUiElements();
 
-    connect(m_modbusManager, &AbstractModbusManager::errorOccurred, this, [this](const QString &error) {
-        m_logManager->addLog(error, true);
-    });
-
-
-    ui->c19le->setText("20.1 %");
-    ui->c27le->setText("12.3 %");
-    ui->connectToRmtRb->setEnabled(true);
-    ui->recordingToFileRb->setEnabled(false);
-
+    // Принудительный вызов для установки начального размера окна под первую вкладку
     onTabChanged(0);
 }
 
+/**
+ * @brief Деструктор главного окна.
+ * Освобождает ресурсы: удаляет сгенерированный UI, контроллер интерфейса,
+ * останавливает таймеры и безопасно разрывает Modbus-соединение.
+ */
 MainWindow::~MainWindow()
 {
     delete ui;
+    // UiController не наследуется от QObject, поэтому удаляем его вручную
+    if (m_uiController) {
+        delete m_uiController;
+    }
     if (m_timer) {
         m_timer->stop();
     }
     if (m_pollingTimer) {
         m_pollingTimer->stop();
     }
+    // Безопасное удаление Modbus-менеджера.
+    // Используем deleteLater(), чтобы избежать краша, если деструктор вызван
+    // во время обработки сигнала от самого менеджера.
     if (m_modbusManager) {
         m_modbusManager->disconnectFromDevice();
         m_modbusManager->deleteLater();
     }
 }
 
-void MainWindow::saveBasePositions()
-{
-    if (m_positionsSaved)
-        return;
-
-    // Список всех виджетов, которые нужно позиционировать
-    // Добавляем сюда новые элементы — координаты берутся автоматически из UI
-    QList<QWidget*> widgets = {
-        ui->c27lbl,
-        ui->c27le,
-        ui->c19lbl,
-        ui->c19le,
-        ui->tableView,
-    };
-
-    for (QWidget *w : widgets) {
-        m_elements.append({ w, w->geometry() });
-    }
-
-    m_positionsSaved = true;
-}
-
-void MainWindow::repositionElements()
-{
-    if (ui->stackedWidget->currentIndex() != 0)
-        return;
-
-    const int pw = ui->stand_1->width();
-    const int ph = ui->stand_1->height();
-
-    if (pw <= 0 || ph <= 0)
-        return;
-
-    const double sx = static_cast<double>(pw) / BASE_W;
-    const double sy = static_cast<double>(ph) / BASE_H;
-
-    for (const auto &e : m_elements) {
-        e.widget->setGeometry(
-            qRound(e.baseGeometry.x() * sx),
-            qRound(e.baseGeometry.y() * sy),
-            qRound(e.baseGeometry.width() * sx),
-            qRound(e.baseGeometry.height() * sy)
-            );
-    }
-}
-
+/**
+ * @brief Переопределенный метод обработки события изменения размера окна.
+ * Делегирует пересчет координат элементов мнемосхемы в UiController.
+ */
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    repositionElements();
+    m_uiController->repositionElements();
 }
 
+/**
+ * @brief Переопределенный метод обработки события первого отображения окна.
+ * Необходим для корректного масштабирования элементов, так как до вызова show()
+ * виджеты могут не иметь своих окончательных геометрических размеров.
+ */
 void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
     // После первого показа размеры уже корректные
-    repositionElements();
-}
-
-void MainWindow::onTabChanged(int index) {
-    QScreen* screen = QGuiApplication::primaryScreen();
-    if (!screen) return;
-
-    QRect availableGeometry = screen->availableGeometry();
-
-    QPoint currentPos = pos();  // Сохраняем позицию
-
-    if (index == 0) {
-        // Первая вкладка - фиксированный размер FullHD (адаптированный)
-        int targetWidth = 1920;
-        int targetHeight = 1080;
-
-        // Адаптируем под экран
-        if (targetWidth > availableGeometry.width() ||
-            targetHeight > availableGeometry.height()) {
-            double scaleX = static_cast<double>(availableGeometry.width()) / targetWidth;
-            double scaleY = static_cast<double>(availableGeometry.height()) / targetHeight;
-            double scale = qMin(scaleX, scaleY);
-
-            targetWidth = static_cast<int>(targetWidth * scale);
-            targetHeight = static_cast<int>(targetHeight * scale);
-        }
-
-        setFixedSize(targetWidth, targetHeight);
-    } else {
-        // Другие вкладки - разрешаем ресайз
-        setMinimumSize(800, 600);  // Минимальный разумный размер
-        setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-        // resize(1280, 720);
-    }
-
-    move(currentPos);  // Восстанавливаем позицию
+    m_uiController->repositionElements();
 }
 
 /**
- * @brief Проверяет и при необходимости пересоздает менеджер Modbus.
- * @param type Требуемый тип соединения.
+ * @brief Проверяет тип текущего Modbus-менеджера и пересоздает его при необходимости.
+ * В данном приложении жестко задано использование ModbusTcpManager.
+ * Если в будущем потребуется поддержка RTU, этот метод можно расширить.
  */
 void MainWindow::ensureCorrectManager() {
     bool needRecreate = false;
@@ -201,7 +135,7 @@ void MainWindow::ensureCorrectManager() {
     }
 
     if (needRecreate) {
-        // Безопасное удаление старого менеджера
+        // Безопасное удаление старого менеджера, если он существовал
         if (m_modbusManager) {
             m_modbusManager->disconnectFromDevice();
             m_modbusManager->deleteLater();
@@ -209,13 +143,16 @@ void MainWindow::ensureCorrectManager() {
 
         m_modbusManager = new ModbusTcpManager(this);
 
-        // Подключаем сигналы
+        // Подключаем сигналы нового менеджера к слотам окна
         setupModbusConnections();
     }
 }
 
 /**
- * @brief Подключает сигналы менеджера Modbus к лямбда-выражениям главного окна.
+ * @brief Центральное место подписки на сигналы Modbus-менеджера.
+ * Связывает события транспортного уровня (подключение, ошибки, получение данных)
+ * с логированием и обновлением UI (модели таблицы).
+ * Здесь же реализована бизнес-логика фильтрации входящих данных.
  */
 void MainWindow::setupModbusConnections() {
     if (!m_modbusManager) return;
@@ -235,12 +172,17 @@ void MainWindow::setupModbusConnections() {
     });
 
     connect(m_modbusManager, &AbstractModbusManager::errorCriticalOccurred, this, [this](const QString &error) {
-        m_logManager->addLog("Critical Error" + error, true);
+        m_logManager->addLog("Critical Error: " + error, true);
     });
 
-    connect(m_modbusManager, &AbstractModbusManager::dataReceived, this, [this](quint8 serverAddress, const QModbusDataUnit &unit) {
-        m_dataModel->updateData(serverAddress, unit);
-        m_logManager->addLog(tr("Data received from device #%1").arg(serverAddress));
+    connect(m_modbusManager, &AbstractModbusManager::dataReceived, this, [this](const ModbusRequest &currentRequest, const QModbusDataUnit &unit) {
+
+        // обновляем таблицу только для запросов начиная с адресов 0x0500 (значения перьев)
+        quint16 startPensAddress = 0x0500;
+        if (currentRequest.startAddress >= startPensAddress) {
+            m_dataModel->updateData(currentRequest.serverAddress, unit);
+        }
+        m_logManager->addLog(tr("Data received from device #%1").arg(currentRequest.serverAddress));
     });
 
     connect(m_modbusManager, &AbstractModbusManager::writeCompleted, this, [this]() {
@@ -248,40 +190,43 @@ void MainWindow::setupModbusConnections() {
     });
 }
 
-
+/**
+ * @brief Инициирует подключение к RMT (Modbus TCP).
+ * Проверяет текущее состояние, чтобы избежать повторных подключений,
+ * и применяет параметры из файла настроек (таймауты, ретраи).
+ */
 void MainWindow::connectToRMT() {
     if (!m_modbusManager) return;
 
+    // Предотвращаем спам-подключения, если процесс уже идет или соединение активно
     if (m_modbusManager->isConnected() || m_modbusManager->isConnecting()) {
         return;
     }
 
     ModbusConnectionSettings settings;
     settings.type = ModbusConnectionSettings::ConnectionType::Tcp;
-    settings.ipAddress = "127.0.0.1";
+    settings.ipAddress = "127.0.0.1"; // TODO: Вынести в SettingsManager
     settings.port = 502;
+
     m_modbusManager->connectToDevice(settings);
+
+    // Применяем пользовательские настройки соединения (таймауты и т.д.)
     Preferences prefs = SettingsManager::loadPreferences();
     m_modbusManager->updateConnectionParameters(prefs);
 }
 
-void MainWindow::onPollingTimeout() {
-    connectToRMT();
-    if (m_modbusManager && m_modbusManager->isConnected()) {
-        qDebug() << "Pollling";
-        sendReadData();
-    }
-}
-
 /**
- * @brief Формирует и отправляет Modbus-запрос на чтение на основе данных из полей ввода.
- * Поддерживает множественные адреса устройств через запятую.
+ * @brief Формирует и отправляет тестовый Modbus-запрос на чтение.
+ * Валидирует входные параметры, защищаясь от переполнения типов,
+ * и передает запрос в очередь Modbus-менеджера.
  */
 void MainWindow::sendReadData() {
     if (m_modbusManager->isProcessing()) {
         return;
     }
 
+    // Захардкоженные параметры для демонстрации/тестирования
+    // В релизной версии должны считываться из UI или конфигурации
     QString addrStr = "1";
     QString funcStr = "03";
     QString startAddressStr = "0x44";
@@ -301,23 +246,78 @@ void MainWindow::sendReadData() {
         return;
     }
 
-
-    bool okDev;
     // Modbus допустимый диапазон адресов устройств: 1-247 (0 - широковещательный)
-    quint8 deviceAddr = addrStr.trimmed().toUInt(&okDev);
-
-    if (!okDev || deviceAddr == 0 || deviceAddr > 247) {
+    bool okDev;
+    uint tempAddr = addrStr.trimmed().toUInt(&okDev);
+    if (!okDev || tempAddr == 0 || tempAddr > 247) {
         m_logManager->addLog(tr("Skipping invalid device address: '%1' (допустимо 1-247)").arg(addrStr), true);
-        //continue;
+        return;
     }
+    quint8 deviceAddr = static_cast<quint8>(tempAddr);
 
     ValidationResult basicCheck = ModbusValidator::validateBasicParams(deviceAddr, funcCode, startAddress, count);
     if (!basicCheck.isValid) {
         m_logManager->addLog(tr("Validation error for address %1: %2").arg(deviceAddr).arg(basicCheck.errorMessage), true);
-        //continue;
+        return;
     }
 
-    // Ставим запрос в очередь
+    // Передача запроса в очередь менеджера
     m_modbusManager->sendReadRequest(deviceAddr, funcCode, startAddress, count);
 
+}
+
+/**
+ * @brief Слот, срабатывающий по таймеру опроса (polling).
+ * Отвечает за автоматическое восстановление связи при обрывах
+ * и периодический запрос телеметрии с устройства.
+ */
+void MainWindow::onPollingTimeout() {
+    connectToRMT();
+    if (m_modbusManager && m_modbusManager->isConnected()) {
+        qDebug() << "Pollling";
+        sendReadData();
+    }
+}
+
+/**
+ * @brief Обработчик переключения вкладок (табов).
+ * Управляет поведением окна: для главной вкладки (мнемосхемы) фиксирует размер
+ * и масштабирует его под доступную область экрана, сохраняя пропорции 16:9.
+ * Для остальных вкладок разрешает свободное изменение размеров окна.
+ *
+ * @param index Индекс выбранной вкладки (0 - 5).
+ */
+void MainWindow::onTabChanged(int index) {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    if (!screen) return;
+
+    QRect availableGeometry = screen->availableGeometry();
+
+    QPoint currentPos = pos();  // Сохраняем текущую позицию окна на экране
+
+    if (index == 0) {
+        // Вкладка 0: Мнемосхема. Фиксированный размер FullHD (1920x1080).
+        int targetWidth = 1920;
+        int targetHeight = 1080;
+
+        // Адаптация под физические размеры монитора (если экран меньше FullHD или есть панели задач)
+        if (targetWidth > availableGeometry.width() ||
+            targetHeight > availableGeometry.height()) {
+            double scaleX = static_cast<double>(availableGeometry.width()) / targetWidth;
+            double scaleY = static_cast<double>(availableGeometry.height()) / targetHeight;
+            double scale = qMin(scaleX, scaleY);
+
+            targetWidth = static_cast<int>(targetWidth * scale);
+            targetHeight = static_cast<int>(targetHeight * scale);
+        }
+
+        setFixedSize(targetWidth, targetHeight);
+        m_uiController->repositionElements();
+    } else {
+        // Остальные вкладки: Разрешаем пользователю свободно менять размер окна
+        setMinimumSize(800, 600);  // Минимальный разумный размер
+        setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+    }
+
+    move(currentPos);  // Восстанавливаем позицию, чтобы окно не "прыгало" в угол
 }

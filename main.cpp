@@ -7,6 +7,10 @@
 
 int main(int argc, char *argv[])
 {
+    // Регистрация кастомного типа для сигналов/слотов
+    qRegisterMetaType<ModbusRequest>("ModbusRequest");
+    qRegisterMetaType<QModbusDataUnit>("QModbusDataUnit");
+
     // Включаем поддержку высокого DPI
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
