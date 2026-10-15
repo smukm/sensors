@@ -284,8 +284,8 @@ void MainWindow::sendReadData() {
 
     QString addrStr = "1";
     QString funcStr = "03";
-    QString startAddressStr = "1";
-    QString countStr = "4";
+    QString startAddressStr = "0x44";
+    QString countStr = "2";
     // Парсим общие параметры (они одинаковы для всех устройств в этом запросе)
     bool okAddr, okQty;
     quint8 funcCode = static_cast<quint8>(funcStr.toInt());
@@ -310,7 +310,7 @@ void MainWindow::sendReadData() {
         m_logManager->addLog(tr("Skipping invalid device address: '%1' (допустимо 1-247)").arg(addrStr), true);
         //continue;
     }
-    qDebug() << funcCode;
+
     ValidationResult basicCheck = ModbusValidator::validateBasicParams(deviceAddr, funcCode, startAddress, count);
     if (!basicCheck.isValid) {
         m_logManager->addLog(tr("Validation error for address %1: %2").arg(deviceAddr).arg(basicCheck.errorMessage), true);

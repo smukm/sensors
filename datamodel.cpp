@@ -17,6 +17,7 @@ DataModel::DataModel(QObject *parent)
 void DataModel::updateData(quint8 serverAddress, const QModbusDataUnit &unit) {
 
     qDebug() << unit.value(0);
+    qDebug() << unit.value(1);
 
     // for (uint i = 0; i < unit.valueCount(); ++i) {
     //     int regAddress = unit.startAddress() + static_cast<int>(i);

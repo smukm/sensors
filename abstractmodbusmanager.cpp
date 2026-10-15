@@ -169,7 +169,12 @@ void AbstractModbusManager::onReplyFinished() {
 
     if (m_currentReply->error() == QModbusDevice::NoError) {
         if (m_currentRequest.type == ModbusRequest::Type::Read) {
-            emit dataReceived(m_currentRequest.serverAddress, m_currentReply->result());
+
+            // эмиттим dataReceived только начиная с адресов 0x0500 (значения перьев)
+            quint16 startPensAddress = 0x0500;
+            if (m_currentRequest.startAddress >= startPensAddress) {
+                emit dataReceived(m_currentRequest.serverAddress, m_currentReply->result());
+            }
         } else {
             emit writeCompleted();
         }
@@ -180,7 +185,9 @@ void AbstractModbusManager::onReplyFinished() {
         else if (excCode == 0x02) exceptionInfo = tr("Illegal Data Address");
         else if (excCode == 0x03) exceptionInfo = tr("Illegal Data Value");
         else if (excCode == 0x04) exceptionInfo = tr("Slave Device Failure");
+        else if (excCode == 0x05) exceptionInfo = tr("Slave Device Busy");
         else if (excCode == 0x06) exceptionInfo = tr("Slave Device Busy");
+        else if (excCode == 0x07) exceptionInfo = tr("Access Denied");
 
         emit errorOccurred(tr("Modbus Exception. Code: %1, Desc: %2, Unit ID: %3, Addr: %4, Func: %5")
                                .arg(excCode).arg(exceptionInfo)
