@@ -324,6 +324,10 @@ void MainWindow::onTabChanged(int index) {
     move(currentPos);  // Восстанавливаем позицию, чтобы окно не "прыгало" в угол
 }
 
+/**
+ * @brief Изменение настроек на лету
+ * @param settings
+ */
 void MainWindow::onSettingsChanged(const ModbusConnectionSettings &settings)
 {
     m_logManager->addLog(tr("Applying new Modbus settings: %1:%2, Device: %3")
@@ -332,14 +336,13 @@ void MainWindow::onSettingsChanged(const ModbusConnectionSettings &settings)
                              .arg(settings.deviceNumber));
 
     if (m_modbusManager) {
-        // 1. Если было активное соединение, разрываем его
+        // Если было активное соединение, разрываем его
         bool wasConnected = m_modbusManager->isConnected();
         if (wasConnected) {
             m_modbusManager->disconnectFromDevice();
         }
 
-        // 2. Инициируем новое подключение.
-        // Метод connectToRMT() сам прочитает свежие данные из SettingsManager::loadRmtSettings()
+        // Инициируем новое подключение.
         connectToRMT();
     }
 }
