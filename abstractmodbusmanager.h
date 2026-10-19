@@ -28,6 +28,9 @@ struct ModbusConnectionSettings {
     // Параметры для TCP
     QString ipAddress = "127.0.0.1";
     qint16 port = 502;
+    quint8 deviceNumber = 1;
+    QString signalStart;
+    QString signalRefueling;
 };
 
 struct ModbusRequest {

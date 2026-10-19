@@ -46,7 +46,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <property name="spacing">
-        <number>6</number>
+        <number>24</number>
        </property>
        <property name="leftMargin">
         <number>6</number>
@@ -60,15 +60,45 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <item alignment="Qt::AlignmentFlag::AlignHCenter">
         <widget class="QRadioButton" name="connectToRmtRb">
+         <property name="styleSheet">
+          <string notr="true">QRadioButton#connectToRmtRb {
+	spacing: 5px;
+}
+QRadioButton#connectToRmtRb::indicator {
+	width: 24px;
+	height: 24px;
+}
+QRadioButton#connectToRmtRb::indicator:unchecked {
+	image: url(:/resources/icons/imgs/green_unchecked_icon.png);
+}
+QRadioButton#connectToRmtRb::indicator:checked {
+	image: url(:/resources/icons/imgs/green_checked_icon.png);
+}</string>
+         </property>
          <property name="text">
           <string>Connect to RMT 59</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item alignment="Qt::AlignmentFlag::AlignHCenter">
         <widget class="QRadioButton" name="recordingToFileRb">
+         <property name="styleSheet">
+          <string notr="true">QRadioButton#connectToRmtRb {
+	spacing: 5px;
+}
+QRadioButton#recordingToFileRb::indicator {
+	width: 24px;
+	height: 24px;
+}
+QRadioButton#recordingToFileRb::indicator:unchecked {
+	image: url(:/resources/icons/imgs/red_unchecked_icon.png);
+}
+QRadioButton#recordingToFileRb::indicator:checked {
+	image: url(:/resources/icons/imgs/red_checked_icon.png);
+}</string>
+         </property>
          <property name="text">
           <string>Recording to file</string>
          </property>
@@ -366,17 +396,133 @@ QWidget#stand_1 QLineEdit {
        </widget>
       </widget>
       <widget class="QWidget" name="settings">
-       <widget class="QLabel" name="label">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>40</x>
-          <y>30</y>
-          <width>101</width>
+          <x>15</x>
+          <y>9</y>
+          <width>351</width>
+          <height>941</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>RMT 59 Settings</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QLabel" name="ipAddressSettingsLbl">
+              <property name="text">
+               <string>IP-address</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ipAddressSettingsLe"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="portSettingsLbl">
+              <property name="text">
+               <string>Port</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="portSettingsLe"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="deviceNumberSettingsLbl">
+              <property name="text">
+               <string>Device number</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="deviceNumberSettingsLe"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="signalStartSettingsLbl">
+              <property name="text">
+               <string>Signal &quot;Start&quot;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="signalStartSettingsLe"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="signalRefuelingSettingsLbl">
+              <property name="text">
+               <string>Signal &quot;Refueling&quot;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="signalRefuelingSettingsLe"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Other</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="lastResteTimeLbl">
+              <property name="text">
+               <string>Last reset time</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lastResetTimeLe"/>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QPushButton" name="saveSettings">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>20</y>
+          <width>261</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save settings (remove in production)</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="settingsMsgLbl">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>60</y>
+          <width>281</width>
           <height>19</height>
          </rect>
         </property>
         <property name="text">
-         <string>Settings</string>
+         <string/>
         </property>
        </widget>
       </widget>

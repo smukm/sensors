@@ -44,5 +44,8 @@ private:
 private slots:
     void onTabChanged(int index);
     void onPollingTimeout();
+
+public slots:
+    void onSettingsChanged(const ModbusConnectionSettings &settings);
 };
 #endif // MAINWINDOW_H

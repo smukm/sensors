@@ -1,5 +1,10 @@
 #include "uicontroller.h"
 #include "./ui_mainwindow.h" // Реальное определение UI
+#include "settingsmanager.h"
+#include <QMessageBox>
+#include <QTimer>
+#include <QHostAddress>
+#include <QAbstractSocket>
 
 /**
  * @brief Структура для хранения относительных координат элемента.
@@ -23,7 +28,7 @@ static const double BASE_H = 1080.0;
  * @brief Конструктор контроллера UI.
  * Сохраняет указатель на сгенерированный класс UI для прямого доступа к виджетам.
  */
-UiController::UiController(Ui::MainWindow *ui) : m_ui(ui) {}
+UiController::UiController(Ui::MainWindow *ui, QObject *parent) : QObject(parent), m_ui(ui) {}
 
 
 /**
@@ -35,8 +40,26 @@ void UiController::initUiElements() {
     m_ui->c19le->setText("20.1 %");
     m_ui->c27le->setText("12.3 %");
 
-    m_ui->connectToRmtRb->setEnabled(false);
-    m_ui->recordingToFileRb->setEnabled(false);
+
+    // Инициализация radiobuttons сверху
+    // Отключаем автоматическое исключение в группе
+    m_ui->connectToRmtRb->setAutoExclusive(false);
+    m_ui->recordingToFileRb->setAutoExclusive(false);
+    // Блокируем клики мышью
+    m_ui->connectToRmtRb->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_ui->recordingToFileRb->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+    m_ui->connectToRmtRb->setChecked(false);
+    m_ui->recordingToFileRb->setChecked(false);
+
+
+    // Чтение settings и заполнение ui элементов с параметрами настройки
+    ModbusConnectionSettings settings = SettingsManager::loadRmtSettings();
+    m_ui->ipAddressSettingsLe->setText(settings.ipAddress);
+    m_ui->portSettingsLe->setText(QString::number(settings.port));
+    m_ui->deviceNumberSettingsLe->setText(QString::number(settings.deviceNumber));
+    m_ui->signalStartSettingsLe->setText(settings.signalStart);
+    m_ui->signalRefuelingSettingsLe->setText(settings.signalRefueling);
 }
 
 /**
@@ -44,7 +67,7 @@ void UiController::initUiElements() {
  * Разблокирует элементы управления, требующие активной связи с устройством.
  */
 void UiController::setConnectedState() {
-    m_ui->connectToRmtRb->setEnabled(true);
+    m_ui->connectToRmtRb->setChecked(true);
 }
 
 /**
@@ -52,7 +75,7 @@ void UiController::setConnectedState() {
  * Блокирует элементы управления для предотвращения отправки запросов в пустоту.
  */
 void UiController::setDisconnectedState() {
-    m_ui->connectToRmtRb->setEnabled(false);
+    m_ui->connectToRmtRb->setChecked(false);
 }
 
 /**
@@ -123,3 +146,87 @@ void UiController::repositionElements()
             );
     }
 }
+
+/**
+ * @brief Валидирует и сохраняет настройки вкладки Settings.
+ *
+ **/
+void UiController::on_saveSettings_clicked()
+{
+    bool okPort, okDevice, okSignalStart, okSignalRefueling;
+
+    // Чтение и очистка данных от лишних пробелов
+    QString ipAddress = m_ui->ipAddressSettingsLe->text().trimmed();
+    QString portStr = m_ui->portSettingsLe->text().trimmed();
+    QString deviceStr = m_ui->deviceNumberSettingsLe->text().trimmed();
+    QString signalStartStr = m_ui->signalStartSettingsLe->text().trimmed();
+    QString signalRefuelingStr = m_ui->signalRefuelingSettingsLe->text().trimmed();
+
+    // Валидация IP-адреса (должен быть корректным IPv4)
+    QHostAddress ipAddr(ipAddress);
+    if (ipAddress.isEmpty() || ipAddr.isNull() || ipAddr.protocol() != QAbstractSocket::IPv4Protocol) {
+        QMessageBox::warning(m_ui->centralwidget,
+                             QObject::tr("Input Error"),
+                             QObject::tr("Invalid IP address.\nPlease enter a valid IPv4 address (e.g., 192.168.1.10)."));
+        return;
+    }
+
+    // Валидация Порта (1 - 65535)
+    int portInt = portStr.toInt(&okPort);
+    if (!okPort || portInt < 1 || portInt > 65535) {
+        QMessageBox::warning(m_ui->centralwidget,
+                             QObject::tr("Input Error"),
+                             QObject::tr("Invalid port number.\nMust be a number between 1 and 65535."));
+        return;
+    }
+
+    // Валидация номера устройства (1 - 247 для Modbus)
+    int deviceInt = deviceStr.toInt(&okDevice);
+    if (!okDevice || deviceInt < 1 || deviceInt > 247) {
+        QMessageBox::warning(m_ui->centralwidget,
+                             QObject::tr("Input Error"),
+                             QObject::tr("Invalid device number.\nMust be a number between 1 and 247."));
+        return;
+    }
+
+    // Валидация адреса "Signal Start"
+    // (Base 0 позволяет вводить как "68", так и "0x44")
+    // int signalStartInt = signalStartStr.toInt(&okSignalStart, 0);
+    // if (signalStartStr.isEmpty() || !okSignalStart || signalStartInt < 0 || signalStartInt > 65535) {
+    //     QMessageBox::warning(m_ui->centralwidget,
+    //                          QObject::tr("Input Error"),
+    //                          QObject::tr("Invalid 'Signal Start' address.\nMust be a valid number between 0 and 65535 (e.g., 68 or 0x44)."));
+    //     return;
+    // }
+
+    // Валидация адреса "Signal Refueling"
+    // int signalRefuelingInt = signalRefuelingStr.toInt(&okSignalRefueling, 0);
+    // if (signalRefuelingStr.isEmpty() || !okSignalRefueling || signalRefuelingInt < 0 || signalRefuelingInt > 65535) {
+    //     QMessageBox::warning(m_ui->centralwidget,
+    //                          QObject::tr("Input Error"),
+    //                          QObject::tr("Invalid 'Signal Refueling' address.\nMust be a valid number between 0 and 65535 (e.g., 68 or 0x44)."));
+    //     return;
+    // }
+
+    // Если все проверки пройдены, формируем и сохраняем настройки
+    ModbusConnectionSettings settings;
+    settings.ipAddress = ipAddress;
+    settings.port = static_cast<qint16>(portInt);
+    settings.deviceNumber = static_cast<quint8>(deviceInt);
+    settings.signalStart = signalStartStr;       // Сохраняем как строку, чтобы сохранить формат (например, "0x44")
+    settings.signalRefueling = signalRefuelingStr;
+
+    if (!SettingsManager::saveRmtSettings(settings)) {
+        QMessageBox::critical(m_ui->centralwidget,
+                              QObject::tr("Error"),
+                              QObject::tr("Failed to save settings to file."));
+    } else {
+        // Успешное сохранение: показываем сообщение зеленым цветом
+        m_ui->settingsMsgLbl->setText("<span style='color: green; font-weight: bold;'>Settings saved successfully</span>");
+
+        QTimer::singleShot(3000, m_ui->settingsMsgLbl, &QLabel::clear);
+
+        emit settingsApplied(settings);
+    }
+}
+

@@ -5,4 +5,10 @@
     <qresource prefix="/translations">
         <file>sensors_ru_RU.ts</file>
     </qresource>
+    <qresource prefix="/resources/icons">
+        <file>imgs/green_checked_icon.png</file>
+        <file>imgs/green_unchecked_icon.png</file>
+        <file>imgs/red_checked_icon.png</file>
+        <file>imgs/red_unchecked_icon.png</file>
+    </qresource>
 </RCC>

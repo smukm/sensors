@@ -64,6 +64,11 @@ MainWindow::MainWindow(QWidget *parent)
         ui->stackedWidget->setCurrentIndex(id);
         onTabChanged(id);
     });
+    connect(ui->saveSettings, &QPushButton::clicked, this, [this]() {
+        m_uiController->on_saveSettings_clicked();
+    });
+    connect(m_uiController, &UiController::settingsApplied,
+            this, &MainWindow::onSettingsChanged);
 
     m_uiController->initUiElements();
 
@@ -203,10 +208,8 @@ void MainWindow::connectToRMT() {
         return;
     }
 
-    ModbusConnectionSettings settings;
+    ModbusConnectionSettings settings = SettingsManager::loadRmtSettings();
     settings.type = ModbusConnectionSettings::ConnectionType::Tcp;
-    settings.ipAddress = "127.0.0.1"; // TODO: Вынести в SettingsManager
-    settings.port = 502;
 
     m_modbusManager->connectToDevice(settings);
 
@@ -225,9 +228,11 @@ void MainWindow::sendReadData() {
         return;
     }
 
+    ModbusConnectionSettings settings = SettingsManager::loadRmtSettings();
+    quint8 deviceAddr = settings.deviceNumber;
     // Захардкоженные параметры для демонстрации/тестирования
     // В релизной версии должны считываться из UI или конфигурации
-    QString addrStr = "1";
+
     QString funcStr = "03";
     QString startAddressStr = "0x44";
     QString countStr = "2";
@@ -247,13 +252,10 @@ void MainWindow::sendReadData() {
     }
 
     // Modbus допустимый диапазон адресов устройств: 1-247 (0 - широковещательный)
-    bool okDev;
-    uint tempAddr = addrStr.trimmed().toUInt(&okDev);
-    if (!okDev || tempAddr == 0 || tempAddr > 247) {
-        m_logManager->addLog(tr("Skipping invalid device address: '%1' (допустимо 1-247)").arg(addrStr), true);
+    if (deviceAddr == 0 || deviceAddr > 247) {
+        m_logManager->addLog(tr("Skipping invalid device address: '%1' (допустимо 1-247)").arg(deviceAddr), true);
         return;
     }
-    quint8 deviceAddr = static_cast<quint8>(tempAddr);
 
     ValidationResult basicCheck = ModbusValidator::validateBasicParams(deviceAddr, funcCode, startAddress, count);
     if (!basicCheck.isValid) {
@@ -320,4 +322,24 @@ void MainWindow::onTabChanged(int index) {
     }
 
     move(currentPos);  // Восстанавливаем позицию, чтобы окно не "прыгало" в угол
+}
+
+void MainWindow::onSettingsChanged(const ModbusConnectionSettings &settings)
+{
+    m_logManager->addLog(tr("Applying new Modbus settings: %1:%2, Device: %3")
+                             .arg(settings.ipAddress)
+                             .arg(settings.port)
+                             .arg(settings.deviceNumber));
+
+    if (m_modbusManager) {
+        // 1. Если было активное соединение, разрываем его
+        bool wasConnected = m_modbusManager->isConnected();
+        if (wasConnected) {
+            m_modbusManager->disconnectFromDevice();
+        }
+
+        // 2. Инициируем новое подключение.
+        // Метод connectToRMT() сам прочитает свежие данные из SettingsManager::loadRmtSettings()
+        connectToRMT();
+    }
 }

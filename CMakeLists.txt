@@ -22,6 +22,7 @@ qt_add_executable(sensors
     settingsmanager.h settingsmanager.cpp
     logmanager.h logmanager.cpp
     modbusvalidator.h modbusvalidator.cpp
+
 )
 
 set(TS_FILES

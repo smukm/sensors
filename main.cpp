@@ -16,6 +16,11 @@ int main(int argc, char *argv[])
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
+    const QString ORGANIZATION_NAME = "Smukm";
+    const QString APP_NAME = "Sensors";
+    QCoreApplication::setOrganizationDomain(ORGANIZATION_NAME);
+    QCoreApplication::setApplicationName(APP_NAME);
+
     QApplication a(argc, argv);
 
     QTranslator translator;
